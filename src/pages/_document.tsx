@@ -12,6 +12,12 @@ class MyDocument extends Document {
         <body>
           <Main />
           <NextScript />
+          {/* Payhip Checkout Overlay Script */}
+          <script
+            type="text/javascript"
+            src="https://payhip.com/payhip.js"
+            async
+          ></script>
         </body>
       </Html>
     );

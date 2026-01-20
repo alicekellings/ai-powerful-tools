@@ -16,15 +16,19 @@ module.exports = {
     extend: {
       colors: {
         primary: {
-          100: '#E6F6FE',
-          200: '#C0EAFC',
-          300: '#9ADDFB',
-          400: '#4FC3F7',
-          500: '#03A9F4',
-          600: '#0398DC',
-          700: '#026592',
-          800: '#014C6E',
-          900: '#013349',
+          100: '#fae8ff',
+          200: '#f5d0fe',
+          300: '#f0abfc',
+          400: '#e879f9',
+          500: '#d946ef', // Magenta from a.html
+          600: '#c026d3',
+          700: '#a21caf',
+          800: '#86198f',
+          900: '#701a75',
+        },
+        action: {
+          DEFAULT: '#e11d48', // Red/Rose for CTA
+          hover: '#be123c',
         },
         gray: {
           100: '#f7fafc',

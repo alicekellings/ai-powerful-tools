@@ -1,6 +1,8 @@
 export const AppConfig = {
-  site_name: 'Starter',
-  title: 'Nextjs Starter',
-  description: 'Starter code for your Nextjs Boilerplate with Tailwind CSS',
+  site_name: 'SmartCut Pro',
+  title: 'SmartCut Pro - Stop Wasting Wood',
+  description:
+    'The professional cutting optimization software for cabinet makers.',
   locale: 'en',
+  payhip_link: 'https://payhip.com/b/YOUR_LINK_HERE', // Placeholder
 };
