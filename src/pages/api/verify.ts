@@ -1,5 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
+import { DEFAULT_PRODUCT_ID, PRODUCTS } from '../../config/products';
+
 // Define verify response structure
 interface VerifyResponse {
   valid: boolean;
@@ -20,7 +22,7 @@ export default async function handler(
       .json({ valid: false, licenseMsg: 'Method Not Allowed' });
   }
 
-  const { licenseKey } = req.body;
+  const { licenseKey, productId } = req.body;
 
   // [SECURITY] 2. Input Validation (Sanitization)
   if (!licenseKey || typeof licenseKey !== 'string') {
@@ -29,10 +31,41 @@ export default async function handler(
       .json({ valid: false, licenseMsg: 'Missing or invalid key format' });
   }
 
+  // productId is optional - use default if not provided (for backward compatibility)
+  if (productId && (typeof productId !== 'string' || !productId.trim())) {
+    return res
+      .status(400)
+      .json({ valid: false, licenseMsg: 'Invalid product ID format' });
+  }
+
   // Trim and limit length (pre-empt brute force with massive payloads)
   const cleanKey = licenseKey.trim();
   if (cleanKey.length > 50) {
     return res.status(400).json({ valid: false, licenseMsg: 'Key too long' });
+  }
+
+  // Validate product ID if provided
+  let selectedProduct;
+  if (productId) {
+    selectedProduct = PRODUCTS.find((p) => p.id === productId);
+    if (!selectedProduct) {
+      return res
+        .status(400)
+        .json({ valid: false, licenseMsg: 'Invalid product ID' });
+    }
+  } else {
+    // Use default product for backward compatibility
+    selectedProduct = PRODUCTS.find((p) => p.id === DEFAULT_PRODUCT_ID);
+    if (!selectedProduct) {
+      // Fallback to first product if default not found
+      const [firstProduct] = PRODUCTS; // Use array destructuring
+      selectedProduct = firstProduct;
+      if (!selectedProduct) {
+        return res
+          .status(500)
+          .json({ valid: false, licenseMsg: 'No products configured' });
+      }
+    }
   }
 
   // Regex Check: Alphanumeric and dashes only (Prevent SQLi/Command Injection patterns)
@@ -53,11 +86,8 @@ export default async function handler(
   }
 
   try {
-    // [注意] HARDCODED PRODUCT ID
-    // 为了确保验证稳定性，这里直接使用了固定的 Product ID: 'sta2v'
-    // 如果你在 Payhip 上更换了产品，或者由其他产品复用此代码，
-    // 请务必将下面的 'sta2v' 修改为新的 Product ID (即 Payhip 产品链接最后那串字符)
-    const productKey = 'sta2v';
+    // Use the selected product's Payhip product ID
+    const productKey = selectedProduct.payhipProductId;
 
     const apiUrl = `https://payhip.com/api/v1/license/verify?product_link=${encodeURIComponent(
       productKey,
@@ -67,22 +97,22 @@ export default async function handler(
       method: 'GET',
       headers: {
         'payhip-api-key': PAYHIP_API_KEY,
-        'User-Agent': 'SmartCutPro-Verifier/1.0',
+        'User-Agent': `${selectedProduct.name}-Verifier/1.0`,
       },
     });
 
-    /* 
+    /*
     // --- [备用方案] Payhip API V2 (Product Secret Key) ---
     // 文档: https://payhip.com/api-docs#verify-license-v2
     // 如果你想改用 Product Secret Key (在 Vercel 环境变量中设置 PAYHIP_PRODUCT_SECRET)，
     // 可以替换上面的 fetch 代码如下:
-    
+
     const apiUrlV2 = `https://payhip.com/api/v2/license/verify?product_link=${encodeURIComponent(productKey)}&license_key=${encodeURIComponent(cleanKey)}`;
     const payhipRes = await fetch(apiUrlV2, {
         method: 'GET',
         headers: {
             'product-secret-key': process.env.PAYHIP_PRODUCT_SECRET!, // 记得在 Vercel 设置这个变量
-            'User-Agent': 'SmartCutPro-Verifier/1.0',
+            'User-Agent': `${selectedProduct.name}-Verifier/1.0`,
         },
     });
     */
@@ -97,7 +127,7 @@ export default async function handler(
     if (payhipRes.status === 200 && isSuccess) {
       return res.status(200).json({
         valid: true,
-        licenseMsg: 'License is active',
+        licenseMsg: `${selectedProduct.name} license is active`,
         email: data.data?.customer_email || '',
       });
     }
@@ -105,7 +135,9 @@ export default async function handler(
     // 验证失败时，返回 Payhip 的原始错误信息
     return res.status(200).json({
       valid: false,
-      licenseMsg: data.message || 'License not found or invalid',
+      licenseMsg:
+        data.message ||
+        `License not found or invalid for ${selectedProduct.name}`,
       payhipDebug: data,
     });
   } catch (error) {

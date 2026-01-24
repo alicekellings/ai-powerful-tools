@@ -1,0 +1,83 @@
+/**
+ * 测试多产品许可证验证功能
+ */
+
+async function testVerification() {
+  // This is a test file for documentation purposes
+  // Testing multi-product license verification API functionality
+
+  // Test data
+  const testCases = [
+    {
+      name: 'Backward Compatibility Test (no product ID)',
+      payload: {
+        licenseKey: 'TEST-KEY-12345',
+      },
+      expected: 'Should use default product (smartcut-pro)'
+    },
+    {
+      name: 'SmartCut Pro Verification',
+      payload: {
+        licenseKey: 'TEST-KEY-12345',
+        productId: 'smartcut-pro'
+      },
+      expected: 'Should use smartcut-pro product'
+    },
+    {
+      name: 'VehicleVault Pro Verification',
+      payload: {
+        licenseKey: 'TEST-KEY-67890',
+        productId: 'vehiclevault-pro'
+      },
+      expected: 'Should use vehiclevault-pro product'
+    },
+    {
+      name: 'Cutting Optimization Pro Verification',
+      payload: {
+        licenseKey: 'TEST-KEY-ABCDE',
+        productId: 'cutting-optimization-pro'
+      },
+      expected: 'Should use cutting-optimization-pro product'
+    },
+    {
+      name: 'Invalid Product ID Test',
+      payload: {
+        licenseKey: 'TEST-KEY-XYZ',
+        productId: 'invalid-product'
+      },
+      expected: 'Should return error for invalid product ID'
+    },
+    {
+      name: 'Invalid License Key Format Test',
+      payload: {
+        licenseKey: 'INVALID@KEY!', // Contains invalid characters
+        productId: 'smartcut-pro'
+      },
+      expected: 'Should return error for invalid key format'
+    }
+  ];
+
+  for (const testCase of testCases) {
+    // Test case details for documentation
+    const testInfo = {
+      test: testCase.name,
+      payload: testCase.payload,
+      expected: testCase.expected
+    };
+    // Process test info
+    testInfo;
+  }
+
+  // Instructions for running actual tests
+  const testInstructions = [
+    'To run actual tests, you would need to:',
+    '1. Set up your Payhip API key in environment variables',
+    '2. Have valid license keys for testing',
+    '3. Run: curl -X POST http://localhost:3000/api/verify -H "Content-Type: application/json" -d \'{"licenseKey": "YOUR_KEY", "productId": "smartcut-pro"}\''
+  ];
+
+  testInstructions;
+}
+
+// Run the test description
+testVerification();
