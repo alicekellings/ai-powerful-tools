@@ -10,7 +10,7 @@
 
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-import { query, execute } from '../../../lib/db.ts';
+import { query, execute } from '../../../lib/db';
 
 interface RevokeRequest {
   licenseKey: string;
