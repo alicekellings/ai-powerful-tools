@@ -33,6 +33,12 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ActivateResponse>,
 ) {
+  // Handle trailing slash for Vercel routing
+  const { pathname } = req.url || '';
+  if (pathname?.endsWith('/')) {
+    return res.redirect(pathname.slice(0, -1));
+  }
+
   // Security: Only POST requests allowed
   if (req.method !== 'POST') {
     return res.status(405).json({
